@@ -1,5 +1,5 @@
 name:                word-count
-version:             0.1.0.0
+version:             0.2.0.0
 github:              "berrym/word-count"
 license:             BSD3
 author:              "Michael Berry"
@@ -35,9 +35,12 @@ ghc-options:
 
 library:
   source-dirs: src
+  dependencies:
+  - bytestring
+  - microlens-platform
 
 executables:
-  word-count-exe:
+  word-count:
     main:                Main.hs
     source-dirs:         app
     ghc-options:

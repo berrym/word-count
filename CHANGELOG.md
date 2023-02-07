@@ -8,6 +8,11 @@ and this project adheres to the
 
 ## Unreleased
 
-## 0.1.0.0 - 2013-01-25
+## 0.1.0.0 - 2023-01-25
 
 Initial commit.
+
+## 0.2.0.0 - 2023-02-07
+
+Refactored to use binary files and ByteStrings. File statistics are kept in a
+tuple type named FileStats. Micro lenses are used to access the tuples.

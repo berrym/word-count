@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           word-count
-version:        0.1.0.0
+version:        0.2.0.0
 description:    Please see the README on GitHub at <https://github.com/berrym/word-count#readme>
 homepage:       https://github.com/berrym/word-count#readme
 bug-reports:    https://github.com/berrym/word-count/issues
@@ -33,9 +33,11 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , microlens-platform
   default-language: Haskell2010
 
-executable word-count-exe
+executable word-count
   main-is: Main.hs
   other-modules:
       Paths_word_count

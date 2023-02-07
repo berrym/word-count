@@ -1,56 +1,90 @@
-{- | Library code for word-count, count words/lines/characters in files.
+{- | Library code for word-count, count lines/words/characters/bytes in files.
      WordCountLib.hs
 -}
 module WordCountLib
-    (
-      readFileContents
+    ( readFileStats
+    , lc'
+    , wc'
+    , cc'
+    , bc'
+    , putByteCount
     , putLineCount
     , putWordCount
     , putCharCount
     , putFileCounts
     ) where
 
-import System.IO
+import qualified Data.ByteString.Char8 as BC
+import qualified Data.ByteString as B
+import Lens.Micro.Platform
+import qualified System.IO as IO
 
-{- | Read the contents of a file and return it as an IO String. -}
-readFileContents :: Handle -> IO String
-readFileContents handle = do
-    contents <- hGetContents handle
-    pure contents
+{- | A tuple to store file statistics. -}
+type FileStats = ( Int      -- Line count
+                 , Int      -- Word count
+                 , Int      -- Character count
+                 , Integer  -- File size in bytes
+                 )
 
-{- | Given a string count the number of lines in it. -}
-lineCount :: String -> Int
-lineCount contents = (length . lines) contents
+{- | Read stats of a file and return the results in a FileStats tuple. -}
+readFileStats :: IO.Handle -> IO FileStats
+readFileStats handle = do
+    bc <- IO.hFileSize handle          -- Get the size of a file in bytes  
+    contents <- B.hGetContents handle  -- Read contents of a file as ByteString
+    let lc = lineCount contents        -- Get the line count of contents
+    let wc = wordCount contents        -- Get the word count of contents
+    let cc = charCount contents        -- Get the character count of contents
+    let fs = (lc, wc, cc, bc)          -- create a FileStat tuple
+    pure fs                            -- return the FileStat tuple
 
-{- | Given a string count the number of words in it . -}
-wordCount :: String -> Int
-wordCount contents = (length . words) contents
+{- | Return the line count in a FileStats tuple using a lens. -}
+lc' :: FileStats -> Int
+lc' fileStats = fileStats ^. _1
 
-{- | Given a string count the number of characters in it. -}
-charCount :: String -> Int
-charCount contents = length contents
+{- | Return the word count in a FileStats tuple using a lens. -}
+wc' :: FileStats -> Int
+wc' fileStats = fileStats ^. _2
 
-{- | Given one of the counting functions print a message and it's results. -}
-putCount :: String -> String -> (String -> Int) -> IO ()
-putCount contents strMsg func = do
-    putStrLn(strMsg ++ show (func contents))
-    putStr "\n"
+{- | Return the character count in a FileStats tuple using a lens. -}
+cc' :: FileStats -> Int
+cc' fileStats = fileStats ^. _3
+
+{- | Return the file size in bytes in a FileStats tuple using a lens. -}
+bc' :: FileStats -> Integer
+bc' fileStats = fileStats ^. _4
+
+{- | Given a ByteString count the number of lines in it. -}
+lineCount :: B.ByteString -> Int
+lineCount contents = (length . BC.lines) contents
+
+{- | Given a ByteString count the number of words in it . -}
+wordCount :: B.ByteString -> Int
+wordCount contents = (length . BC.words) contents
+
+{- | Given a ByteString count the number of characters in it. -}
+charCount :: B.ByteString -> Int
+charCount contents = B.length contents
 
 {- | Print the results of lineCount. -}
-putLineCount :: String -> IO ()
-putLineCount contents = putCount contents "Lines:\t" lineCount
+putLineCount :: Int -> IO ()
+putLineCount lc = putStrLn ("Lines:\t" ++ (show lc))
 
 {- | Print the results of wordCount. -}
-putWordCount :: String -> IO ()
-putWordCount contents = putCount contents "Words:\t" wordCount
+putWordCount :: Int -> IO ()
+putWordCount wc = putStrLn ("Words:\t" ++ (show wc))
 
 {- | Print the results of charCount. -}
-putCharCount :: String -> IO ()
-putCharCount contents = putCount contents "Chars:\t" charCount
+putCharCount :: Int -> IO ()
+putCharCount cc = putStrLn ("Chars:\t" ++ (show cc))
+
+{- | Print the file size in bytes. -}
+putByteCount :: Integer -> IO ()
+putByteCount bc = putStrLn ("Bytes:\t" ++ (show bc))
 
 {- | Print the results of all the counting functions. -}
-putFileCounts :: String -> IO ()
-putFileCounts contents = do
-    putLineCount contents
-    putWordCount contents
-    putCharCount contents
+putFileCounts :: FileStats -> IO ()
+putFileCounts (lc, wc, cc, bc) = do
+    putLineCount lc
+    putWordCount wc
+    putCharCount cc
+    putByteCount bc
