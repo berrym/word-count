@@ -50,6 +50,7 @@ executables:
     dependencies:
     - word-count
     - optparse-applicative
+    - bytestring
 
 tests:
   word-count-test:

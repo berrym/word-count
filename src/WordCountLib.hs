@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 {- | Library code for word-count, count lines/words/characters/bytes in files.
      WordCountLib.hs
 -}
@@ -11,7 +13,7 @@ module WordCountLib
     , putLineCount
     , putWordCount
     , putCharCount
-    , putFileCounts
+    , putFileStats
     ) where
 
 import qualified Data.ByteString.Char8 as BC
@@ -20,11 +22,12 @@ import Lens.Micro.Platform
 import qualified System.IO as IO
 
 {- | A tuple to store file statistics. -}
-type FileStats = ( Int      -- Line count
-                 , Int      -- Word count
-                 , Int      -- Character count
-                 , Integer  -- File size in bytes
-                 )
+type FileStats =
+    ( Int      -- Line count
+    , Int      -- Word count
+    , Int      -- Character count
+    , Integer  -- File size in bytes
+    )
 
 {- | Read stats of a file and return the results in a FileStats tuple. -}
 readFileStats :: IO.Handle -> IO FileStats
@@ -67,23 +70,23 @@ charCount contents = B.length contents
 
 {- | Print the results of lineCount. -}
 putLineCount :: Int -> IO ()
-putLineCount lc = putStrLn ("Lines:\t" ++ (show lc))
+putLineCount lc = B.hPut IO.stdout ("Lines:\t" <> (BC.pack (show lc)) <> "\n")
 
 {- | Print the results of wordCount. -}
 putWordCount :: Int -> IO ()
-putWordCount wc = putStrLn ("Words:\t" ++ (show wc))
+putWordCount wc = B.hPut IO.stdout ("Words:\t" <> (BC.pack (show wc)) <> "\n")
 
 {- | Print the results of charCount. -}
 putCharCount :: Int -> IO ()
-putCharCount cc = putStrLn ("Chars:\t" ++ (show cc))
+putCharCount cc = B.hPut IO.stdout ("Chars:\t" <> (BC.pack (show cc)) <> "\n")
 
 {- | Print the file size in bytes. -}
 putByteCount :: Integer -> IO ()
-putByteCount bc = putStrLn ("Bytes:\t" ++ (show bc))
+putByteCount bc = B.hPut IO.stdout ("Bytes:\t" <> (BC.pack (show bc)) <> "\n")
 
 {- | Print the results of all the counting functions. -}
-putFileCounts :: FileStats -> IO ()
-putFileCounts (lc, wc, cc, bc) = do
+putFileStats :: FileStats -> IO ()
+putFileStats (lc, wc, cc, bc) = do
     putLineCount lc
     putWordCount wc
     putCharCount cc
